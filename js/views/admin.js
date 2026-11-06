@@ -14,9 +14,9 @@ export async function render(root, ctx) {
       <button class="btn" type="button" id="seedAll">زرع القوالب</button></div>
       <div id="reports">${loading()}</div></section>
     <section class="card"><div class="card-head"><div><h2>المستخدمين</h2><span class="muted">ماكو تسجيل ذاتي. الحسابات تنشأ من هنا فقط.</span></div></div>
-      <form id="newUser" class="form-grid" novalidate>
-        <div class="field"><label for="nu">اسم المستخدم</label><input class="input num" id="nu" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="مثلاً: ali" required></div>
-        <div class="field"><label for="np">كلمة المرور</label><input class="input num" id="np" type="password" autocomplete="new-password" minlength="6" required></div>
+      <form id="newUser" class="form-grid" novalidate autocomplete="off">
+        <div class="field"><label for="nu">اسم المستخدم الجديد</label><input class="input num" id="nu" name="new-user-name" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="مثلاً: ali" readonly required></div>
+        <div class="field"><label for="np">كلمة مرور الحساب الجديد</label><input class="input num" id="np" name="new-user-pass" type="password" autocomplete="new-password" minlength="6" readonly required></div>
         <div class="field"><label for="nr">الدور</label><select class="input" id="nr">${roleOptions('viewer')}</select></div>
         <div class="field"><span class="label">التقارير</span><div style="display:flex;gap:14px;flex-wrap:wrap" id="nrep">${reportChecks([], 'n')}</div></div>
         <button class="btn primary" type="submit" id="nuBtn">إنشاء حساب</button>
@@ -29,6 +29,9 @@ export async function render(root, ctx) {
     </section>
   </main>`;
   bindHeader(root, ctx);
+  // يمنع المتصفح من تعبئة يوزر وباسورد المدير بخانات الحساب الجديد
+  $$('#nu, #np', root).forEach(i => ['pointerdown', 'focus', 'keydown'].forEach(ev =>
+    i.addEventListener(ev, () => i.removeAttribute('readonly'), { once: true })));
 
   async function loadReports() {
     const box = $('#reports', root);

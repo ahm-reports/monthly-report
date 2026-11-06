@@ -1,5 +1,5 @@
 // نقطة البداية: الدخول + التوجيه بين الشاشات (hash router).
-import { configured, onAuth, getProfile, logout, REPORT_IDS } from './firebase.js';
+import { configured, onAuth, getProfile, logout, updateUser, seedReport, REPORT_IDS } from './firebase.js';
 import { loading, toast } from './ui.js';
 import * as loginView from './views/login.js';
 import * as homeView from './views/home.js';
@@ -50,6 +50,20 @@ async function route() {
   }
 }
 
+// المدير يشوف كل التقارير دائماً، والقوالب الناقصة تنزرع تلقائياً.
+async function ensureAdminSetup() {
+  try {
+    const mine = Array.isArray(ctx.profile.reports) ? ctx.profile.reports : [];
+    const missing = REPORT_IDS.filter(r => !mine.includes(r));
+    if (missing.length) {
+      const reports = [...mine, ...missing];
+      await updateUser(ctx.user.uid, { reports });
+      ctx.profile.reports = reports;
+    }
+    for (const [i, id] of REPORT_IDS.entries()) await seedReport(id, i + 1);
+  } catch (e) { console.error('admin setup', e); }
+}
+
 function renderNotConfigured() {
   root.innerHTML = `<div class="wrap narrow"><div class="card"><h2>التطبيق مو مربوط بـ Firebase بعد</h2>
     <p class="muted" style="line-height:1.8;margin:0">عبّي ملف <code>js/firebase-config.js</code> بإعدادات مشروع Firebase. الخطوات بملف README.</p></div></div>`;
@@ -72,6 +86,7 @@ if (!configured) {
     if (user) {
       try { ctx.profile = await getProfile(user.uid); }
       catch (e) { console.error(e); ctx.profile = null; }
+      if (ctx.isAdmin()) await ensureAdminSetup();
     }
     route();
     if (first) { first = false; window.addEventListener('hashchange', route); }

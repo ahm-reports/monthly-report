@@ -17,8 +17,8 @@ export const DEFAULT_ALERTS = { foodCostMax: 0.35, expenseMax: 0.45 };
 
 // للتجربة المحلية فقط: افتح التطبيق على localhost وضيف ?emulator للرابط.
 const useEmulator = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('emulator');
-const config = useEmulator && !firebaseConfig.projectId
-  ? { apiKey: 'demo-key', authDomain: 'localhost', projectId: 'demo-monthly-report', appId: 'demo' }
+const config = useEmulator
+  ?{ apiKey: 'demo-key', authDomain: 'localhost', projectId: 'demo-monthly-report', appId: 'demo' }
   : firebaseConfig;
 
 export const configured = Boolean(config.projectId && config.apiKey);

@@ -127,6 +127,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .note span { font-size: 15px; line-height: 1.7; }
 @media (max-width: 640px) { .hero-num { font-size: 40px; } .kpi-num { font-size: 26px; } .card.hero { padding: 20px !important; } }
 
+/* growth */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.card-head > .seg, .seg { display: flex; flex-direction: row; background: var(--inset); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.seg button { min-height: 44px; padding: 0 16px; border-radius: 9px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; background: none; color: var(--tx3); font-family: inherit; }
+.seg button.on { background: var(--sales); color: var(--bg); }
+.growth-tbl { width: 100%; border-collapse: separate; border-spacing: 4px; font-size: 13px; }
+.growth-tbl th { font-weight: 500; color: var(--tx2); padding: 8px; white-space: nowrap; }
+.g-head { text-align: start; padding: 10px 8px; white-space: nowrap; position: sticky; right: 0; background: var(--card); z-index: 1; font-weight: 400; color: var(--tx3); padding-inline-start: 22px !important; }
+.g-head.top { font-weight: 700; color: var(--tx); padding-inline-start: 8px !important; }
+.g-cell { text-align: center; padding: 10px 6px; border-radius: 8px; white-space: nowrap; color: #F1F5F9; }
+
 /* import steps */
 .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .steps li { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px 8px 10px; font-size: 14px; }

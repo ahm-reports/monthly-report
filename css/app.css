@@ -99,6 +99,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tbl td { padding: 12px 8px; border-bottom: 1px solid var(--row); vertical-align: middle; }
 .tbl .num { text-align: end; white-space: nowrap; }
 
+/* import steps */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.steps li { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px 8px 10px; font-size: 14px; }
+.steps li span { width: 26px; height: 26px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: var(--good); color: var(--bg); }
+.steps li.cur { background: var(--card2); border-color: var(--sales); font-weight: 600; }
+.steps li.cur span { background: var(--sales); }
+.steps li.todo { color: var(--tx2); }
+.steps li.todo span { background: var(--line); color: var(--tx3); }
+
 /* report picker */
 .report-card { text-decoration: none; color: var(--tx); background: linear-gradient(160deg, #13213F 0%, #0F1A30 100%); border: 1px solid #2C4170; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
 .report-card:hover { color: var(--tx); border-color: var(--sales); }

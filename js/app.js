@@ -5,6 +5,8 @@ import * as loginView from './views/login.js';
 import * as homeView from './views/home.js';
 import * as adminView from './views/admin.js';
 import * as pendingView from './views/pending.js';
+import * as importView from './views/import.js';
+import * as monthsView from './views/months.js';
 
 const root = document.getElementById('app');
 const ctx = {
@@ -38,9 +40,19 @@ async function route() {
       const reportId = parts[1];
       if (!ctx.allowedReports().includes(reportId)) { toast('ما عندك صلاحية على هذا التقرير.', true); location.hash = '#/'; return; }
       const sub = parts[2] || 'dash';
-      const titles = { dash: ['لوحة التحكم', 4], growth: ['النمو', 5], months: ['الأشهر', 3], import: ['إدراج شهر جديد', 3] };
+      if (sub === 'import') {
+        if (!ctx.canEdit()) { location.hash = `#/r/${reportId}`; return; }
+        return await importView.render(root, ctx, reportId);
+      }
+      if (sub === 'months') {
+        if (parts[3]) {
+          if (!ctx.canEdit() || !/^\d{4}-\d{2}$/.test(parts[3])) { location.hash = `#/r/${reportId}/months`; return; }
+          return await monthsView.renderEdit(root, ctx, reportId, parts[3]);
+        }
+        return await monthsView.render(root, ctx, reportId);
+      }
+      const titles = { dash: ['لوحة التحكم', 4], growth: ['النمو', 5] };
       if (!titles[sub]) { location.hash = `#/r/${reportId}`; return; }
-      if ((sub === 'import') && !ctx.canEdit()) { location.hash = `#/r/${reportId}`; return; }
       return await pendingView.render(root, ctx, { reportId, active: sub, title: titles[sub][0], phase: titles[sub][1] });
     }
     location.hash = '#/';

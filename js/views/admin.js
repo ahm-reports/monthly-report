@@ -5,6 +5,7 @@ import {
 } from '../firebase.js';
 import { esc } from '../format.js';
 import { header, bindHeader, loading, toast, $, $$ } from '../ui.js';
+import { mountSummaryImport } from './summary-import.js';
 
 export async function render(root, ctx) {
   let names = {};
@@ -23,10 +24,8 @@ export async function render(root, ctx) {
       </form>
       <div class="alert err" id="nuErr" role="alert" hidden></div>
       <div class="scroll-x" id="users">${loading()}</div></section>
-    <section class="row">
-      <div class="card dashed" style="flex:1 1 300px"><h2>محرر القالب</h2><span class="muted">يجي بالمرحلة 6.</span></div>
-      <div class="card dashed" style="flex:1 1 300px"><h2>استيراد الملخص السنوي</h2><span class="muted">يجي بالمرحلة 3.</span></div>
-    </section>
+    <section class="card" id="summaryImport"></section>
+    <section class="card dashed"><h2>محرر القالب</h2><span class="muted">يجي بالمرحلة 6.</span></section>
   </main>`;
   bindHeader(root, ctx);
   // يمنع المتصفح من تعبئة يوزر وباسورد المدير بخانات الحساب الجديد
@@ -126,6 +125,7 @@ export async function render(root, ctx) {
     return REPORT_IDS.map(id => `<label class="check"><input type="checkbox" data-rep value="${id}" ${selected.includes(id) ? 'checked' : ''}>${esc(names[id] || id)}</label>`).join('');
   }
   await loadReports();
+  mountSummaryImport($('#summaryImport', root), ctx, names);
   await loadUsers();
 }
 

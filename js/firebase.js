@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword, connectAuthEmulator, setPersistence, browserLocalPersistence
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
-  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, orderBy,
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, writeBatch, collection, query, orderBy,
   serverTimestamp, connectFirestoreEmulator
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
@@ -106,6 +106,25 @@ export async function listMonths(reportId) {
   const s = await getDocs(query(collection(db, 'reports', reportId, 'months'), orderBy('__name__')));
   return s.docs.map(d => ({ id: d.id, ...d.data() }));
 }
+export async function getMonth(reportId, monthId) {
+  const s = await getDoc(doc(db, 'reports', reportId, 'months', monthId));
+  return s.exists() ? { id: monthId, ...s.data() } : null;
+}
+function monthDoc(values, other_revenue, source) {
+  const clean = {};
+  for (const [k, v] of Object.entries(values || {})) clean[k] = typeof v === 'number' && isFinite(v) ? v : 0;
+  return { values: clean, other_revenue: Number(other_revenue) || 0, source, updatedAt: serverTimestamp(), updatedBy: auth.currentUser.uid };
+}
+export function saveMonth(reportId, monthId, { values, other_revenue, source }) {
+  return setDoc(doc(db, 'reports', reportId, 'months', monthId), monthDoc(values, other_revenue, source));
+}
+export async function saveMonthsBatch(reportId, months, source) {
+  const b = writeBatch(db);
+  for (const m of months) b.set(doc(db, 'reports', reportId, 'months', m.id), monthDoc(m.values, m.other_revenue, source));
+  await b.commit();
+}
+export function deleteMonth(reportId, monthId) { return deleteDoc(doc(db, 'reports', reportId, 'months', monthId)); }
+
 // آخر شهر محفوظ (المعرّفات YYYY-MM تترتب صح كنص).
 export async function lastMonth(reportId) {
   const all = await listMonths(reportId);

@@ -1,5 +1,7 @@
 // تنسيق الأرقام والأشهر للعرض.
 export const MONTH_NAMES = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
+export const MONTH_SHORT = ['ك٢', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'ت١', 'ت٢', 'ك١'];
+export function monthTiny(id) { const m = Number(String(id).split('-')[1]); return MONTH_SHORT[m - 1] || String(id); }
 export const MINUS = '−';
 export const DASH = '—';
 

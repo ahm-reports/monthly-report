@@ -7,6 +7,7 @@ import * as adminView from './views/admin.js';
 import * as pendingView from './views/pending.js';
 import * as importView from './views/import.js';
 import * as monthsView from './views/months.js';
+import * as dashView from './views/dashboard.js';
 
 const root = document.getElementById('app');
 const ctx = {
@@ -51,7 +52,8 @@ async function route() {
         }
         return await monthsView.render(root, ctx, reportId);
       }
-      const titles = { dash: ['لوحة التحكم', 4], growth: ['النمو', 5] };
+      if (sub === 'dash') return await dashView.render(root, ctx, reportId);
+      const titles = { growth: ['النمو', 5] };
       if (!titles[sub]) { location.hash = `#/r/${reportId}`; return; }
       return await pendingView.render(root, ctx, { reportId, active: sub, title: titles[sub][0], phase: titles[sub][1] });
     }

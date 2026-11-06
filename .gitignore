@@ -1,0 +1,7 @@
+*.xlsx
+*.xls
+*.csv
+test-data/
+design-options/
+design-reference/
+PROMPT.md

@@ -1,6 +1,6 @@
 // إدراج شهر: اختيار الشهر ← رفع القالب الخام ← المراجعة ← الحفظ.
 // الملف ينقرأ داخل المتصفح فقط، وما ينرفع لأي مكان. ينحفظ بس الأرقام بعد المراجعة.
-import { getReport, listMonths, saveMonth, updateReport, authErrorText } from '../firebase.js';
+import { getReport, listMonths, getMonth, saveMonthWithLog, updateReport, authErrorText } from '../firebase.js';
 import { parseRawExcel } from '../parse-raw.js';
 import { monthName, esc } from '../format.js';
 import { header, bindHeader, loading, toast, $ } from '../ui.js';
@@ -96,10 +96,13 @@ export async function render(root, ctx, reportId) {
         if (saved.has(monthId) && !confirm(`شهر ${monthName(monthId)} محفوظ من قبل. تريد تستبدل أرقامه بالأرقام الجديدة؟`)) return;
         try {
           if (templateChanged && ctx.isAdmin()) { await updateReport(reportId, { template }); rep.template = template; }
-          await saveMonth(reportId, monthId, { values, other_revenue: other, source: 'raw' });
+          const old = saved.has(monthId) ? await getMonth(reportId, monthId) : null;
+          await saveMonthWithLog(reportId, monthId, { values, other_revenue: other, source: 'raw' }, old);
           saved.add(monthId);
+          toast('انحفظ الشهر');
+          if (ctx.signal.aborted || !$('#review', root)) return;   // المستخدم طلع من الصفحة أثناء الحفظ
           setStep(5);
-          $('#review', root).innerHTML = `<div class="alert ok" style="flex-direction:column;gap:10px">
+          $('#review', root).innerHTML =`<div class="alert ok" style="flex-direction:column;gap:10px">
             <b style="font-size:16px;color:#5EEAD4">✓ تم حفظ شهر ${esc(monthName(monthId))}</b>
             <span style="color:var(--tx3)">الملخص والجارتات والنمو تتحدث من هذا الشهر.</span>
             <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn primary" href="#/r/${reportId}">افتح الملخص</a><a class="btn" href="#/r/${reportId}/months">الأشهر</a></div></div>`;

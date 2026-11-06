@@ -6,6 +6,7 @@ import {
 import { esc } from '../format.js';
 import { header, bindHeader, loading, toast, $, $$ } from '../ui.js';
 import { mountSummaryImport } from './summary-import.js';
+import { mountTemplateEditor } from './template-editor.js';
 
 export async function render(root, ctx) {
   let names = {};
@@ -25,7 +26,7 @@ export async function render(root, ctx) {
       <div class="alert err" id="nuErr" role="alert" hidden></div>
       <div class="scroll-x" id="users">${loading()}</div></section>
     <section class="card" id="summaryImport"></section>
-    <section class="card dashed"><h2>محرر القالب</h2><span class="muted">يجي بالمرحلة 6.</span></section>
+    <section class="card" id="templateEditor"></section>
   </main>`;
   bindHeader(root, ctx);
   // يمنع المتصفح من تعبئة يوزر وباسورد المدير بخانات الحساب الجديد
@@ -48,6 +49,9 @@ export async function render(root, ctx) {
         <div style="display:flex;justify-content:space-between;align-items:center"><b class="ltr">${esc(id)}</b><span class="tag gray">${rep.template?.items?.length || 0} بند بالقالب</span></div>
         <div class="field"><label for="dn_${id}">الاسم المعروض</label><input class="input" id="dn_${id}" value="${esc(rep.displayName)}" required maxlength="60"></div>
         <div class="field"><label for="fr_${id}">نسبة الإدارة (%)</label><input class="input num" id="fr_${id}" inputmode="decimal" value="${+(rep.feeRate * 100).toFixed(4)}" required></div>
+        <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="field"><label for="af_${id}">حد تنبيه الكلفة الغذائية (%)</label><input class="input num" id="af_${id}" inputmode="decimal" value="${+(((rep.alerts || {}).foodCostMax ?? 0.35) * 100).toFixed(2)}"></div>
+          <div class="field"><label for="ae_${id}">حد تنبيه المصاريف (%)</label><input class="input num" id="ae_${id}" inputmode="decimal" value="${+(((rep.alerts || {}).expenseMax ?? 0.45) * 100).toFixed(2)}"></div></div>
         <button class="btn" type="submit">حفظ</button></form>`;
     }).join('')}</div>`;
     $$('form[data-report]', box).forEach(f => f.addEventListener('submit', async (e) => {
@@ -57,7 +61,9 @@ export async function render(root, ctx) {
       const fee = Number($(`#fr_${id}`, f).value.replace(/[^0-9.]/g, ''));
       if (!displayName) return toast('اكتب اسم التقرير.', true);
       if (!(fee >= 0 && fee < 100)) return toast('نسبة الإدارة لازم تكون بين 0 و 99.', true);
-      try { await updateReport(id, { displayName, feeRate: fee / 100 }); toast('انحفظت إعدادات ' + displayName); loadReports(); loadUsers(); }
+      const af = Number($(`#af_${id}`, f).value.replace(/[^0-9.]/g, '')), ae = Number($(`#ae_${id}`, f).value.replace(/[^0-9.]/g, ''));
+      if (!(af > 0 && af <= 100 && ae > 0 && ae <= 200)) return toast('حدود التنبيه لازم تكون نسبة أكبر من صفر.', true);
+      try { await updateReport(id, { displayName, feeRate: fee / 100, alerts: { foodCostMax: af / 100, expenseMax: ae / 100 } }); toast('انحفظت إعدادات ' + displayName); loadReports(); loadUsers(); }
       catch (ex) { toast(authErrorText(ex), true); }
     }));
   }
@@ -126,6 +132,7 @@ export async function render(root, ctx) {
   }
   await loadReports();
   mountSummaryImport($('#summaryImport', root), ctx, names);
+  mountTemplateEditor($('#templateEditor', root), ctx, names);
   await loadUsers();
 }
 

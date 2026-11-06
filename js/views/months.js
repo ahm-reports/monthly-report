@@ -1,5 +1,5 @@
 // الأشهر: قائمة الأشهر المحفوظة، وتعديل أي شهر بنفس شاشة المراجعة.
-import { getReport, listMonths, getMonth, saveMonth, deleteMonth, authErrorText } from '../firebase.js';
+import { listUsers, getReport, listMonths, getMonth, saveMonthWithLog, listLog, deleteMonth, authErrorText } from '../firebase.js';
 import { calcMonth } from '../calc.js';
 import { monthName, num, esc } from '../format.js';
 import { header, bindHeader, loading, toast, ICONS, $, $$ } from '../ui.js';
@@ -47,7 +47,8 @@ export async function renderEdit(root, ctx, reportId, monthId) {
   root.innerHTML = `<main class="wrap">${header(ctx, { title: 'تعديل ' + monthName(monthId), kicker: rep.displayName, reportId, active: 'months' })}
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="#/r/${reportId}/months">→ رجوع للأشهر</a>
       <span class="tag ${m.source === 'summary' ? 'gray' : 'blue'}">${(SOURCE[m.source] || ['—'])[0]}</span></div>
-    <div id="review" class="stack" style="gap:22px"></div></main>`;
+    <div id="review" class="stack" style="gap:22px"></div>
+    <section class="card" id="log"><h2>سجل التعديلات</h2>${loading()}</section></main>`;
   bindHeader(root, ctx);
   const values = Object.fromEntries(rep.template.items.map(it => [it.key, Number(m.values?.[it.key]) || 0]));
   for (const [k, v] of Object.entries(m.values || {})) if (!(k in values)) values[k] = v;   // قيم بنود محذوفة من القالب تبقى
@@ -56,10 +57,25 @@ export async function renderEdit(root, ctx, reportId, monthId) {
     canEditTemplate: false,
     onSave: async ({ values, other }) => {
       try {
-        await saveMonth(reportId, monthId, { values, other_revenue: other, source: m.source || 'raw' });
+        await saveMonthWithLog(reportId, monthId, { values, other_revenue: other, source: m.source || 'raw' }, m);
         toast('انحفظت التعديلات');
         location.hash = `#/r/${reportId}/months`;
       } catch (e) { console.error(e); toast(authErrorText(e), true); }
     },
   });
+  renderLog($('#log', root), ctx, rep, reportId, monthId);
+}
+
+async function renderLog(box, ctx, rep, reportId, monthId) {
+  let log = [];
+  try { log = await listLog(reportId, monthId); } catch (e) { box.innerHTML = `<h2>سجل التعديلات</h2><div class="alert err">${esc(authErrorText(e))}</div>`; return; }
+  let names = {};
+  if (ctx.isAdmin()) { try { names = Object.fromEntries((await listUsers()).map(u => [u.uid, u.username])); } catch { /* ignore */ } }
+  const who = (uid) => uid === ctx.user.uid ? 'إنت' : names[uid] || 'مستخدم آخر';
+  const label = (k) => k === 'other_revenue' ? 'إيرادات مختلفة' : rep.template.items.find(it => it.key === k)?.label || k;
+  const when = (t) => t && t.toDate ? t.toDate().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  box.innerHTML = `<div class="card-head"><div><h2>سجل التعديلات</h2><span class="muted">كل تعديل على أرقام هذا الشهر بعد حفظه أول مرة. السجل ما يتعدل ولا ينحذف.</span></div></div>
+    ${log.length ? `<div class="scroll-x"><table class="tbl" style="min-width:600px"><thead><tr><th>الوقت</th><th>المستخدم</th><th>البند</th><th class="num">القيمة القديمة</th><th class="num">القيمة الجديدة</th></tr></thead><tbody>
+    ${log.map(l => `<tr><td class="ltr" style="text-align:right">${esc(when(l.at))}</td><td>${esc(who(l.by))}</td><td>${esc(label(l.key))}</td><td class="num">${num(l.oldValue)}</td><td class="num">${num(l.newValue)}</td></tr>`).join('')}
+    </tbody></table></div>` : '<span class="muted">ماكو تعديلات بعد.</span>'}`;
 }

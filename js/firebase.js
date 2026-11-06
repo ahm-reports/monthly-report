@@ -123,6 +123,28 @@ export async function saveMonthsBatch(reportId, months, source) {
   for (const m of months) b.set(doc(db, 'reports', reportId, 'months', m.id), monthDoc(m.values, m.other_revenue, source));
   await b.commit();
 }
+// يحفظ الشهر ويضيف سطر بسجل التعديلات لكل بند تغير (إضافة فقط).
+export async function saveMonthWithLog(reportId, monthId, data, old) {
+  const b = writeBatch(db);
+  const mref = doc(db, 'reports', reportId, 'months', monthId);
+  b.set(mref, monthDoc(data.values, data.other_revenue, data.source));
+  if (old) {
+    const oldV = old.values || {}, newV = data.values || {};
+    const keys = new Set([...Object.keys(oldV), ...Object.keys(newV)]);
+    const changes = [];
+    for (const k of keys) { const a = Number(oldV[k]) || 0, c = Number(newV[k]) || 0; if (a !== c) changes.push([k, a, c]); }
+    const ao = Number(old.other_revenue) || 0, co = Number(data.other_revenue) || 0;
+    if (ao !== co) changes.push(['other_revenue', ao, co]);
+    for (const [key, oldValue, newValue] of changes) {
+      b.set(doc(collection(mref, 'log')), { at: serverTimestamp(), by: auth.currentUser.uid, key, oldValue, newValue });
+    }
+  }
+  await b.commit();
+}
+export async function listLog(reportId, monthId) {
+  const s = await getDocs(query(collection(db, 'reports', reportId, 'months', monthId, 'log'), orderBy('at', 'desc')));
+  return s.docs.map(d => ({ id: d.id, ...d.data() }));
+}
 export function deleteMonth(reportId, monthId) { return deleteDoc(doc(db, 'reports', reportId, 'months', monthId)); }
 
 // آخر شهر محفوظ (المعرّفات YYYY-MM تترتب صح كنص).

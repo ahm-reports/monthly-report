@@ -1,8 +1,10 @@
 // لوحة التحكم (الملخص) — كل الأجزاء تبني نفسها من القالب والأشهر المحفوظة.
 import { getReport, listMonths } from '../firebase.js';
 import { calcMonth, growth, insights, itemsOf } from '../calc.js';
-import { num, mil, pct, monthShort, monthTiny, esc } from '../format.js';
-import { header, bindHeader, loading, ICONS, $$ } from '../ui.js';
+import { num, mil, pct, monthShort, monthTiny, monthName, esc } from '../format.js';
+import { header, bindHeader, loading, toast, ICONS, $, $$ } from '../ui.js';
+import { loadXLSX } from '../xlsx.js';
+import { SECTIONS, SECTION_LABELS } from '../calc.js';
 
 const COLORS = { S: '#60A5FA', P: '#F59E0B', E: '#6366F1', E2: '#818CF8', G: '#34D399', F: '#F472B6', O: '#38BDF8', good: '#2DD4BF', bad: '#FB923C' };
 const selected = {}; // reportId → monthId (يبقى أثناء التنقل)
@@ -29,6 +31,12 @@ export async function render(root, ctx, reportId) {
     root.innerHTML = shell(view(rep, months, calcs, i, reportId));
     bindHeader(root, ctx);
     $$('[data-month]', root).forEach(b => b.addEventListener('click', () => { selected[reportId] = b.dataset.month; draw(); }));
+    $('#btnPdf', root).addEventListener('click', () => window.print());
+    $('#btnXlsx', root).addEventListener('click', async (e) => {
+      const btn = e.currentTarget; btn.disabled = true;
+      try { await exportExcel(rep, months[i], calcs[i]); } catch (err) { console.error(err); toast('ما كدرت أسوي ملف الإكسل.', true); }
+      finally { btn.disabled = false; }
+    });
   };
   draw();
 }
@@ -48,8 +56,10 @@ function view(rep, months, calcs, i, reportId) {
   const ytd = calcs.slice(0, i + 1).filter((_, k) => months[k].id.startsWith(year)).reduce((a, x) => a + x.N, 0);
 
   // ---- شريط الأشهر
-  const pills = `<div class="month-bar" role="group" aria-label="اختيار الشهر">${months.map((mm, k) =>
-    `<button type="button" class="pill ${k === i ? 'on' : ''}" data-month="${mm.id}" ${k === i ? 'aria-pressed="true"' : 'aria-pressed="false"'}>${esc(monthShort(mm.id))}${months.some(x => x.id.slice(0, 4) !== year) ? ' ' + mm.id.slice(0, 4) : ''}</button>`).join('')}</div>`;
+  const pills = `<div class="dash-tools"><div class="month-bar" role="group" aria-label="اختيار الشهر">${months.map((mm, k) =>
+    `<button type="button" class="pill ${k === i ? 'on' : ''}" data-month="${mm.id}" ${k === i ? 'aria-pressed="true"' : 'aria-pressed="false"'}>${esc(monthShort(mm.id))}${months.some(x => x.id.slice(0, 4) !== year) ? ' ' + mm.id.slice(0, 4) : ''}</button>`).join('')}</div>
+    <div class="no-print" style="display:flex;gap:8px;flex:none"><button class="btn" type="button" id="btnPdf" title="طباعة أو حفظ PDF">PDF</button><button class="btn" type="button" id="btnXlsx" title="تنزيل الشهر Excel">Excel</button></div></div>
+    <div class="print-only print-title">${esc(rep.displayName)} — ${esc(monthName(m.id))}</div>`;
 
   // ---- بطاقة الربح الصافي
   const hd = delta(c.N, pc && pc.N, true);
@@ -77,16 +87,23 @@ function view(rep, months, calcs, i, reportId) {
   const nSales = itemsOf(T, 'sales').length;
   const kpis = `<div class="kpi-grid">
     ${kp('المبيعات', c.S, pc && pc.S, true, COLORS.S, `الإجمالي من ${nSales} ${nSales > 10 ? 'مصدر' : 'مصادر'}`, c.S ? 1 : 0)}
-    ${kp('المشتريات', c.P, pc && pc.P, false, COLORS.P, 'الكلفة الغذائية ' + pct(c.foodCost), c.foodCost)}
-    ${kp('المصاريف', c.E, pc && pc.E, false, COLORS.E2, pct(c.expenseRatio) + ' من المبيعات', c.expenseRatio)}
+    ${kp('المشتريات', c.P, pc && pc.P, false, COLORS.P, 'الكلفة الغذائية ' + pct(c.foodCost) + over(c.foodCost, rep.alerts?.foodCostMax), c.foodCost)}
+    ${kp('المصاريف', c.E, pc && pc.E, false, COLORS.E2, pct(c.expenseRatio) + ' من المبيعات' + over(c.expenseRatio, rep.alerts?.expenseMax), c.expenseRatio)}
     ${kp('الربح الإجمالي', c.G2, pc && pc.G2, true, COLORS.G, 'الهامش ' + pct(c.grossMargin), c.grossMargin)}</div>`;
 
-  return `${pills}
+  const al = rep.alerts || {}, warns = [];
+  if (c.foodCost !== null && al.foodCostMax && c.foodCost > al.foodCostMax) warns.push(`الكلفة الغذائية ${pct(c.foodCost)} أعلى من الحد ${pct(al.foodCostMax)}.`);
+  if (c.expenseRatio !== null && al.expenseMax && c.expenseRatio > al.expenseMax) warns.push(`المصاريف ${pct(c.expenseRatio)} من المبيعات، أعلى من الحد ${pct(al.expenseMax)}.`);
+  if (c.N < 0) warns.push(`${esc(name)} شهر خسارة: الصافي ${num(c.N)} د.ع.`);
+  const alerts = warns.length ? `<div class="alert warn" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>${warns.join(' ')}</span></div>` : '';
+  return `${pills}${alerts}
     <section class="row">${hero}<div style="flex:2 1 560px;min-width:0">${kpis}</div></section>
     <section class="row">${dinarCard(months, calcs, i)}${bridgeCard(c, name, rep)}</section>
     <section class="row">${sourcesCard(T, m, pm, c, name, prevName)}${ratiosCard(months, calcs, i, c)}</section>
     <section class="row">${costsCard(T, m, pm, c, name)}${insightsCard(months, i, rep, name)}</section>`;
 }
+
+function over(v, max) { return v !== null && max && v > max ? ' <span class="tag orange" style="font-size:11px;padding:2px 8px">فوق الحد</span>' : ''; }
 
 function sparkline(vals, i) {
   const W = 300, H = 60, pad = 4;
@@ -194,4 +211,40 @@ function insightsCard(months, i, rep, name) {
     <div style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg><h2>ملاحظات ${esc(name)}</h2></div>
     <span class="muted">يطلعها التطبيق تلقائياً من الأرقام</span>
     ${list.map(n => `<div class="note"><b>${esc(n.tag)}</b><span>${esc(n.text)}</span></div>`).join('')}</div>`;
+}
+
+// تصدير الشهر Excel (SheetJS) — الملف يتسوى بالمتصفح وينزل للجهاز.
+async function exportExcel(rep, m, c) {
+  const XLSX = await loadXLSX();
+  const rows = [[rep.displayName + ' — ' + monthName(m.id)], [], ['القسم', 'البند', 'المبلغ (د.ع)', 'من المبيعات']];
+  for (const s of SECTIONS) {
+    for (const it of rep.template.items.filter(x => x.section === s)) {
+      const v = Number(m.values?.[it.key]) || 0;
+      if (it.hidden && !v) continue;
+      rows.push([SECTION_LABELS[s], it.label, v, c.S ? v / c.S : null]);
+    }
+    const tot = { sales: c.S, purchases: c.P, expenses: c.E }[s];
+    rows.push([SECTION_LABELS[s], 'المجموع', tot, c.S ? tot / c.S : null], []);
+  }
+  rows.push(['النتيجة', 'الربح الإجمالي', c.G, c.S ? c.G / c.S : null]);
+  rows.push(['النتيجة', 'إيرادات مختلفة', c.O, c.S ? c.O / c.S : null]);
+  rows.push(['النتيجة', 'نسبة الإدارة ' + pct(c.feeRate, 0), c.F, c.S ? c.F / c.S : null]);
+  rows.push(['النتيجة', 'الربح الصافي', c.N, c.netMargin]);
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 18 }, { wch: 14 }];
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let r = 3; r <= range.e.r; r++) {
+    const a = ws[XLSX.utils.encode_cell({ r, c: 2 })], b = ws[XLSX.utils.encode_cell({ r, c: 3 })];
+    if (a && typeof a.v === 'number') a.z = '#,##0.##';
+    if (b && typeof b.v === 'number') b.z = '0.0%';
+  }
+  const wb = XLSX.utils.book_new();
+  wb.Workbook = { Views: [{ RTL: true }] };
+  XLSX.utils.book_append_sheet(wb, ws, m.id);
+  const data = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const url = URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = `${rep.id}-${m.id}.xlsx`;   // اسم إنكليزي حتى يشتغل بكل المتصفحات
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

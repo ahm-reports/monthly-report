@@ -4,7 +4,7 @@ import { loading, toast } from './ui.js';
 import * as loginView from './views/login.js';
 import * as homeView from './views/home.js';
 import * as adminView from './views/admin.js';
-import * as pendingView from './views/pending.js';
+import * as compareView from './views/compare.js';
 import * as importView from './views/import.js';
 import * as monthsView from './views/months.js';
 import * as dashView from './views/dashboard.js';
@@ -37,7 +37,7 @@ async function route() {
       if (!ctx.isAdmin()) { location.hash = '#/'; return; }
       return await adminView.render(root, ctx);
     }
-    if (parts[0] === 'compare') return pendingView.render(root, ctx, { title: 'مقارنة التقريرين', phase: 6 });
+    if (parts[0] === 'compare') return await compareView.render(root, ctx);
     if (parts[0] === 'r' && parts[1]) {
       const reportId = parts[1];
       if (!ctx.allowedReports().includes(reportId)) { toast('ما عندك صلاحية على هذا التقرير.', true); location.hash = '#/'; return; }

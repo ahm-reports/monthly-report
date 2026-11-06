@@ -119,7 +119,15 @@ npx firebase emulators:start --config ../firebase.json --only firestore,auth --p
 
 ### الاختبارات
 ```bash
-cd tests && npm install && npm run test:rules
+npm install --prefix tests
+```
+```bash
+npm test
+```
+تجرب الحسابات وقراءة الإكسل. اختبارات الملفات تحتاج مجلد `test-data/` (ملفات الإكسل و`expected.json` بالأرقام المتوقعة). هذا المجلد ما ينرفع للـ repo، وإذا ما موجود تتخطى هاي الاختبارات.
+
+```bash
+cd tests && npm run test:rules
 ```
 تجرب قواعد الأمان على المحاكي (تحتاج Java).
 

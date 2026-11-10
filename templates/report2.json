@@ -1,0 +1,220 @@
+{
+  "items": [
+    {
+      "key": "ground_food",
+      "label": "الطابق الأرضي (طعام)",
+      "section": "sales",
+      "rawAliases": [
+        "الطابق الأرضي الطعام"
+      ],
+      "summaryAliases": [
+        "الطابق الأرضي الطعام"
+      ]
+    },
+    {
+      "key": "first_sweets",
+      "label": "الطابق الأول (حلويات)",
+      "section": "sales",
+      "rawAliases": [
+        "الطابق الأول حلويات"
+      ],
+      "summaryAliases": [
+        "الطابق الأول حلويات"
+      ]
+    },
+    {
+      "key": "first_drinks",
+      "label": "الطابق الأول (مشاريب)",
+      "section": "sales",
+      "rawAliases": [
+        "طابق الأول مشاريب"
+      ],
+      "summaryAliases": [
+        "طابق الأول مشاريب"
+      ]
+    },
+    {
+      "key": "first_cats",
+      "label": "الطابق الأول (قطط)",
+      "section": "sales",
+      "rawAliases": [
+        "طابق الأول قطط"
+      ],
+      "summaryAliases": [
+        "طابق الأول قطط"
+      ]
+    },
+    {
+      "key": "takeaway",
+      "label": "السفري",
+      "section": "sales",
+      "rawAliases": [
+        "بيع السفري"
+      ],
+      "summaryAliases": [
+        "بيع السفري"
+      ]
+    },
+    {
+      "key": "kitchen",
+      "label": "مشتريات المطبخ",
+      "section": "purchases",
+      "rawAliases": [
+        "مشتريات مطبخ"
+      ],
+      "summaryAliases": [
+        "مشتريات مطبخ"
+      ]
+    },
+    {
+      "key": "pastry",
+      "label": "مشتريات المعجنات",
+      "section": "purchases",
+      "rawAliases": [
+        "مشتريات معجنات"
+      ],
+      "summaryAliases": [
+        "مشتريات معجنات"
+      ]
+    },
+    {
+      "key": "bar",
+      "label": "مشتريات البار",
+      "section": "purchases",
+      "rawAliases": [
+        "مشتريات بار"
+      ],
+      "summaryAliases": [
+        "مشتريات بار"
+      ]
+    },
+    {
+      "key": "drinks",
+      "label": "مشاريب",
+      "section": "purchases",
+      "rawAliases": [
+        "مشاريب"
+      ],
+      "summaryAliases": [
+        "مشاريب"
+      ]
+    },
+    {
+      "key": "gas",
+      "label": "غاز",
+      "section": "expenses",
+      "rawAliases": [
+        "غاز"
+      ],
+      "summaryAliases": [
+        "غاز"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "cleaning",
+      "label": "منظفات",
+      "section": "expenses",
+      "rawAliases": [
+        "منظفات"
+      ],
+      "summaryAliases": [
+        "منظفات"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "travel",
+      "label": "سفريات",
+      "section": "expenses",
+      "rawAliases": [
+        "سفريات"
+      ],
+      "summaryAliases": [
+        "سفريات"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "kitchen_misc",
+      "label": "متنوعة للمطبخ",
+      "section": "expenses",
+      "rawAliases": [
+        "مصاريف متنوعة للمطبخ"
+      ],
+      "summaryAliases": [
+        "مصاريف متنوعة للمطبخ"
+      ]
+    },
+    {
+      "key": "misc",
+      "label": "مصاريف متنوعة عامة",
+      "section": "expenses",
+      "rawAliases": [
+        "مصاريف متنوعة عامة"
+      ],
+      "summaryAliases": [
+        "مصاريف متنوعة عامة"
+      ]
+    },
+    {
+      "key": "maintenance",
+      "label": "صيانة وكاز ومولدة",
+      "section": "expenses",
+      "rawAliases": [
+        "صيانة +كاز+مصاريف أخرى(مولدة)"
+      ],
+      "summaryAliases": [
+        "صيانة +كاز+مصاريف أخرى(مولدة)"
+      ]
+    },
+    {
+      "key": "marketing",
+      "label": "تسويق",
+      "section": "expenses",
+      "rawAliases": [
+        "تسويق ( ترويج + تصوير )"
+      ],
+      "summaryAliases": [
+        "تسويق ( ترويج + تصوير )"
+      ]
+    },
+    {
+      "key": "electricity",
+      "label": "كهرباء",
+      "section": "expenses",
+      "rawAliases": [
+        "كهرباء"
+      ],
+      "summaryAliases": [
+        "كهرباء"
+      ]
+    },
+    {
+      "key": "salaries",
+      "label": "رواتب",
+      "section": "expenses",
+      "rawAliases": [
+        "رواتب"
+      ],
+      "summaryAliases": [
+        "رواتب"
+      ]
+    },
+    {
+      "key": "rent",
+      "label": "إيجارات",
+      "section": "expenses",
+      "rawAliases": [
+        "ايجارات"
+      ],
+      "summaryAliases": [
+        "ايجارات"
+      ]
+    }
+  ],
+  "fixedKeys": [
+    "salaries",
+    "rent"
+  ]
+}

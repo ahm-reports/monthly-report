@@ -1,0 +1,253 @@
+{
+  "items": [
+    {
+      "key": "ground_cash",
+      "label": "الطابق الأرضي (نقد)",
+      "section": "sales",
+      "rawAliases": [
+        "الطابق الأرضي"
+      ],
+      "summaryAliases": [
+        "الطابق الارضي"
+      ]
+    },
+    {
+      "key": "first_cash",
+      "label": "الطابق الأول (نقد)",
+      "section": "sales",
+      "rawAliases": [
+        "الطابق الأول"
+      ],
+      "summaryAliases": [
+        "الطابق الاول"
+      ]
+    },
+    {
+      "key": "card",
+      "label": "بطاقة دفع",
+      "section": "sales",
+      "rawAliases": [
+        "بطاقة دفع"
+      ],
+      "summaryAliases": [
+        "بطاقة دفع"
+      ]
+    },
+    {
+      "key": "credit",
+      "label": "الآجل",
+      "section": "sales",
+      "rawAliases": [
+        "بيع الفقدي"
+      ],
+      "summaryAliases": [
+        "الاجل"
+      ]
+    },
+    {
+      "key": "takeaway",
+      "label": "السفري",
+      "section": "sales",
+      "rawAliases": [
+        "بيع السفري"
+      ],
+      "summaryAliases": [
+        "السفري"
+      ]
+    },
+    {
+      "key": "red_meat",
+      "label": "لحوم حمراء",
+      "section": "purchases",
+      "rawAliases": [
+        "لحوم حمراء"
+      ],
+      "summaryAliases": [
+        "لحوم حمراء"
+      ]
+    },
+    {
+      "key": "chicken",
+      "label": "دجاج",
+      "section": "purchases",
+      "rawAliases": [
+        "دجاج"
+      ],
+      "summaryAliases": [
+        "دجاج"
+      ]
+    },
+    {
+      "key": "produce",
+      "label": "فواكه وخضروات",
+      "section": "purchases",
+      "rawAliases": [
+        "فواكه خضروات"
+      ],
+      "summaryAliases": [
+        "فواكة خضروات"
+      ]
+    },
+    {
+      "key": "kitchen",
+      "label": "مشتريات المطبخ",
+      "section": "purchases",
+      "rawAliases": [
+        "مشتريات متنوعة للمطبخ"
+      ],
+      "summaryAliases": [
+        "مشتريات للمطبخ"
+      ]
+    },
+    {
+      "key": "bar",
+      "label": "مشتريات البار",
+      "section": "purchases",
+      "rawAliases": [
+        "مشتريات البار"
+      ],
+      "summaryAliases": [
+        "مشتريات البار"
+      ]
+    },
+    {
+      "key": "drinks",
+      "label": "مشروبات",
+      "section": "purchases",
+      "rawAliases": [
+        "مشروبات"
+      ],
+      "summaryAliases": [
+        "مشروبات"
+      ]
+    },
+    {
+      "key": "gas",
+      "label": "غاز",
+      "section": "expenses",
+      "rawAliases": [
+        "غاز"
+      ],
+      "summaryAliases": [
+        "غاز"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "charcoal",
+      "label": "فحم",
+      "section": "expenses",
+      "rawAliases": [
+        "فحم اوكراني + جل"
+      ],
+      "summaryAliases": [
+        "فحم"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "travel_cleaning",
+      "label": "سفريات ومنظفات",
+      "section": "expenses",
+      "rawAliases": [
+        "سفريات ومنظفات"
+      ],
+      "summaryAliases": [
+        "سفريات منطفات"
+      ],
+      "movedFrom": "purchases"
+    },
+    {
+      "key": "misc",
+      "label": "مصاريف متنوعة",
+      "section": "expenses",
+      "rawAliases": [
+        "مصاريف متنوعة"
+      ],
+      "summaryAliases": [
+        "مصاريف متنوعه"
+      ]
+    },
+    {
+      "key": "kitchen_misc",
+      "label": "متنوعة للمطبخ",
+      "section": "expenses",
+      "rawAliases": [
+        "مصاريف متنوعة للمطبخ"
+      ],
+      "summaryAliases": [
+        "متنوعه للمطبخ"
+      ]
+    },
+    {
+      "key": "maintenance",
+      "label": "صيانة وكاز ومولدة",
+      "section": "expenses",
+      "rawAliases": [
+        "صيانة +كاز+مصاريف أخرى(مولدة)"
+      ],
+      "summaryAliases": [
+        "صيانة +كاز"
+      ]
+    },
+    {
+      "key": "marketing",
+      "label": "تسويق",
+      "section": "expenses",
+      "rawAliases": [
+        "تسويق ( ترويج + تصوير )"
+      ],
+      "summaryAliases": [
+        "تسويق"
+      ]
+    },
+    {
+      "key": "hookah",
+      "label": "أراكيل",
+      "section": "expenses",
+      "rawAliases": [
+        "اراكيل"
+      ],
+      "summaryAliases": [
+        "اراكيل"
+      ]
+    },
+    {
+      "key": "salaries",
+      "label": "رواتب",
+      "section": "expenses",
+      "rawAliases": [
+        "رواتب"
+      ],
+      "summaryAliases": [
+        "رواتب"
+      ]
+    },
+    {
+      "key": "electricity",
+      "label": "كهرباء",
+      "section": "expenses",
+      "rawAliases": [
+        "كهرباء"
+      ],
+      "summaryAliases": [
+        "كهرباء"
+      ]
+    },
+    {
+      "key": "rent",
+      "label": "إيجارات",
+      "section": "expenses",
+      "rawAliases": [
+        "ايجارات"
+      ],
+      "summaryAliases": [
+        "ايجارات"
+      ]
+    }
+  ],
+  "fixedKeys": [
+    "salaries",
+    "rent"
+  ]
+}

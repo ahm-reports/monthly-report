@@ -1,0 +1,9 @@
+{
+  "name": "monthly-report",
+  "private": true,
+  "type": "module",
+  "description": "Static app (no build step). This file only marks js/ as ES modules for Node tests.",
+  "scripts": {
+    "test": "node --test tests/calc.test.js tests/parse.test.js"
+  }
+}

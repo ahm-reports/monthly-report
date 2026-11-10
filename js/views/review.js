@@ -28,7 +28,7 @@ export function mountReview(box, opts) {
     const alerts = [];
     if (missing.length) alerts.push(`<div class="alert warn">${ICONS.warn}<span>${missing.map(it => esc(it.label)).join('، ')} ${missing.length > 1 ? 'ما بيها أرقام' : 'ما بيها رقم'} بالملف. اكتب الرقم إذا أكو فاتورة، أو اتركها صفر.</span></div>`);
     if (notInFile.length) alerts.push(`<div class="alert warn">${ICONS.warn}<span>هاي البنود ما موجودة بالملف أصلاً، وقيمتها 0: ${notInFile.map(it => esc(it.label)).join('، ')}.</span></div>`);
-    for (const w of opts.warnings || []) alerts.push(`<div class="alert warn">${ICONS.warn}<span>${esc(w.text)}</span></div>`);
+    for (const w of opts.warnings || []) alerts.push(`<div class="alert ${w.type === 'numericName' ? 'err' : 'warn'}" role="alert">${ICONS.warn}<span>${esc(w.text)}</span></div>`);
     if (opts.checks && opts.checks.length && opts.checks.every(c => c.ok)) {
       alerts.push(`<div class="alert ok"><span>✓ تحقق المجاميع: ${opts.checks.map(c => `${esc(c.label)} ${num(c.fileTotal)}`).join(' · ')} — كلها مطابقة.</span></div>`);
     }

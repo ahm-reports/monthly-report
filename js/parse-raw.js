@@ -38,6 +38,16 @@ export function parseRawRows(rows, template, { firstRow = 1 } = {}) {
     if (!name) return;                                   // صف بلا اسم يتجاهل حتى لو بيه رقم
     const num = parseNumber(row?.[1]);
 
+    // اسم البند مكتوب رقم بس (مثل 0): إذا المبلغ صفر أو فارغ يتجاهل مثل الصف الفارغ،
+    // وإذا بيه مبلغ ينطي تحذير، وما يدخل لقائمة البنود غير المعروفة ولا ينربط بأي بند.
+    if (isNumericName(rawName)) {
+      if (!num) return;
+      if (section) fileSums[section] += num;
+      warnings.push({ type: 'numericName', row: rowNo, value: num, section,
+        text: `الصف ${rowNo}: اسم البند مكتوب رقم، صححه بالملف. (المبلغ ${Math.round(num).toLocaleString('en-US')} ما انحسب على أي بند)` });
+      return;
+    }
+
     const head = HEADER_INDEX.get(name);
     if (head) {
       section = head;
@@ -82,6 +92,13 @@ export function parseRawRows(rows, template, { firstRow = 1 } = {}) {
   }
 
   return { values, flags, unknown, checks, warnings, readCount };
+}
+
+// خانة الاسم بيها رقم بس (12 ، 0 ، "1,000" ، "٣")
+export function isNumericName(v) {
+  if (typeof v === 'number') return true;
+  const s = String(v ?? '').trim();
+  return s !== '' && /^[\s0-9٠-٩۰-۹.,٫٬\-−+]+$/.test(s) && /[0-9٠-٩۰-۹]/.test(s);
 }
 
 // المستخدم اختار مفتاح لبند غير معروف: نضيف قيمته للبند، ونرجع القالب بعد إضافة الاسم لـ rawAliases.

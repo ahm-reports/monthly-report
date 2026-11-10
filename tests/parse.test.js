@@ -92,6 +92,26 @@ test('3ب. التطبيع والأرقام النصية والبند غير ال
   assert.equal(parseRawRows([['شي جديد', 3]], template).values.chicken, 3, 'يتعرف عليه بالمرة الجاية');
 });
 
+test('3د. اسم البند مكتوب رقم', () => {
+  const t = tpl('report2');
+  const rows = [
+    ['الإيرادات', 100], ['بيع السفري', 100],
+    ['مشتريات', 75], ['مشتريات مطبخ', 50],
+    [0, 0], [0, null], [12, ''], ['0', '0'],             // تتجاهل مثل الصفوف الفارغة
+    [0, 25],                                              // رقم بمكان الاسم ومبلغ مو صفر
+    ['المصاريف الكلية', 0],
+  ];
+  const r = parseRawRows(rows, t);
+  assert.deepEqual(r.unknown, [], 'ما يطلع بقائمة البنود غير المعروفة');
+  const w = r.warnings.filter(x => x.type === 'numericName');
+  assert.equal(w.length, 1);
+  assert.equal(w[0].row, 9);
+  assert.match(w[0].text, /^الصف 9: اسم البند مكتوب رقم، صححه بالملف/);
+  assert.equal(r.values.kitchen, 50, 'المبلغ ما ينضاف لأي بند');
+  assert.ok(r.checks.find(c => c.section === 'purchases').ok, 'تحقق المجاميع يحسب الصف حتى يطابق الملف');
+  assert.equal(r.readCount, 2);
+});
+
 test('3ج. تحذير المجاميع إذا الفرق أكثر من 1', () => {
   const r = parseRawRows([['الإيرادات', 100], ['بيع السفري', 98]], tpl('report1'));
   const s = r.checks.find(x => x.section === 'sales');

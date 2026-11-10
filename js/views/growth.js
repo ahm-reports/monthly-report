@@ -57,7 +57,11 @@ export async function render(root, ctx, reportId) {
     // بطاقات الملخص
     const gr = C.slice(1).map((c, j) => growth(c.S, mom ? C[j].S : C[0].S));
     const valid = gr.map((r, j) => ({ r, k: j + 1 })).filter(x => x.r !== null);
-    const avg = valid.length ? valid.reduce((a, x) => a + x.r, 0) / valid.length : null;
+    // المعدل الشهري الحقيقي (مركّب): (آخر شهر ÷ أول شهر) ^ (1 ÷ عدد الفترات) − 1
+    // بوضع "عن أول شهر": التغير الكلي من أول شهر لآخر شهر.
+    const first = C[0].S, last = C[C.length - 1].S, periods = C.length - 1;
+    const total = growth(last, first);
+    const avg = total === null || !(last > 0) ? null : (mom ? Math.pow(last / first, 1 / periods) - 1 : total);
     const best = valid.reduce((a, x) => (!a || x.r > a.r ? x : a), null), worst = valid.reduce((a, x) => (!a || x.r < a.r ? x : a), null);
     const year = months[months.length - 1].id.slice(0, 4);
     const ytdIdx = months.map((m, k) => (m.id.startsWith(year) ? k : -1)).filter(k => k >= 0);
@@ -66,7 +70,9 @@ export async function render(root, ctx, reportId) {
     const cmp = (k) => mom ? `${monthShort(months[k].id)} مقارنة بـ ${monthShort(months[k - 1].id)}` : `${monthShort(months[k].id)} مقارنة بـ ${base}`;
     const stat = (label, value, sub, color) => `<div class="card" style="border-radius:18px;padding:20px;gap:8px"><span style="font-size:13px;color:var(--tx3)">${label}</span><span style="font-size:28px;font-weight:700;color:${color}"><bdi dir="ltr">${value}</bdi></span><span class="muted">${sub}</span></div>`;
     const stats = `<section class="stat-grid">
-      ${stat(mom ? 'متوسط النمو الشهري للمبيعات' : 'متوسط المبيعات عن ' + base, sgn(avg), `من ${monthShort(months[1].id)} لـ ${monthShort(months[months.length - 1].id)}`, avg === null ? 'var(--tx2)' : avg >= 0 ? 'var(--good)' : 'var(--bad)')}
+      ${stat(mom ? 'معدل النمو الشهري للمبيعات' : 'تغير المبيعات عن ' + base, sgn(avg),
+        mom ? `بالشهر، من ${monthShort(months[0].id)} لـ ${monthShort(months[months.length - 1].id)} (الكلي ${sgn(total)})` : `من ${monthShort(months[0].id)} لـ ${monthShort(months[months.length - 1].id)}`,
+        avg === null ? 'var(--tx2)' : avg >= 0 ? 'var(--good)' : 'var(--bad)')}
       ${stat(mom ? 'أقوى شهر نمو' : 'أعلى شهر عن ' + base, best ? sgn(best.r) : '—', best ? cmp(best.k) : '—', best && best.r >= 0 ? 'var(--good)' : 'var(--bad)')}
       ${stat(mom ? 'أكبر تراجع' : 'أدنى شهر عن ' + base, worst ? sgn(worst.r) : '—', worst ? cmp(worst.k) : '—', worst && worst.r >= 0 ? 'var(--good)' : 'var(--bad)')}
       ${stat('من بداية السنة', mil(ytdN) + '</bdi> <bdi>مليون', `ربح صافي من مبيعات ${mil(ytdS)} مليون`, ytdN < 0 ? 'var(--bad)' : 'var(--tx)')}
